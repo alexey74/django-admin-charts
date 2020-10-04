@@ -47,18 +47,27 @@ class ChartDataView(TemplateView):
 
     def get_context_data(self, *args, interval=None, graph_key=None, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        interval = self.request.GET.get('select_box_interval', interval)
-        context['chart_type'] = self.request.GET.get('select_box_chart_type', interval)
+        interval = str(self.request.GET.get('select_box_interval', interval))
+        context['chart_type'] = str(
+            self.request.GET.get('select_box_chart_type', interval)
+        )
+        graph_key = str(graph_key)
         try:
-            time_since = datetime.strptime(self.request.GET.get('time_since', None), '%Y-%m-%d')
-            time_until = datetime.strptime(self.request.GET.get('time_until', None), '%Y-%m-%d')
+            time_since = datetime.strptime(
+                self.request.GET.get('time_since', None), '%Y-%m-%d'
+            )
+            time_until = datetime.strptime(
+                self.request.GET.get('time_until', None), '%Y-%m-%d'
+            )
         except ValueError:
             return context
 
         dashboard_stats = DashboardStats.objects.get(graph_key=graph_key)
 
         try:
-            series = dashboard_stats.get_multi_time_series(self.request.GET, time_since, time_until, interval, self.request)
+            series = dashboard_stats.get_multi_time_series(
+                self.request.GET, time_since, time_until, interval, self.request
+            )
         except Exception as e:
             if 'debug' in self.request.GET:
                 raise e
@@ -79,7 +88,10 @@ class ChartDataView(TemplateView):
         names = {}
         xdata = []
         serie_i_map = OrderedDict()
-        for date in sorted(series.keys(), key=lambda d: datetime(d.year, d.month, d.day, getattr(d, 'hour', 0))):
+        for date in sorted(
+            series.keys(),
+            key=lambda d: datetime(d.year, d.month, d.day, getattr(d, 'hour', 0)),
+        ):
             xdata.append(int(time.mktime(date.timetuple()) * 1000))
             for key, value in series[date].items():
                 if key not in serie_i_map:
@@ -87,7 +99,9 @@ class ChartDataView(TemplateView):
                 y_key = 'y%i' % serie_i_map[key]
                 if y_key not in ydata_serie:
                     ydata_serie[y_key] = []
-                    names['name%i' % serie_i_map[key]] = str(choices[key][1] if key in choices else key)
+                    names['name%i' % serie_i_map[key]] = str(
+                        choices[key][1] if key in choices else key
+                    )
                 ydata_serie[y_key].append(value)
 
         context['extra'] = {
@@ -101,7 +115,9 @@ class ChartDataView(TemplateView):
         if context['chart_type'] == 'stackedAreaChart':
             context['extra']['use_interactive_guideline'] = True
 
-        tooltip_date_format, context['extra']['x_axis_format'] = get_dateformat(interval, context['chart_type'])
+        tooltip_date_format, context['extra']['x_axis_format'] = get_dateformat(
+            interval, context['chart_type']
+        )
 
         extra_serie = {
             "tooltip": {"y_start": "", "y_end": ""},
@@ -110,7 +126,10 @@ class ChartDataView(TemplateView):
 
         context['values'] = {
             'x': xdata,
-            'name1': interval, **ydata_serie, **names, 'extra1': extra_serie,
+            'name1': interval,
+            **ydata_serie,
+            **names,
+            'extra1': extra_serie,
         }
 
         context['chart_container'] = "chart_container_" + graph_key
