@@ -41,7 +41,7 @@ def get_dateformat(interval, chart_type):
     return interval_dateformat_map[interval]
 
 
-@method_decorator(user_passes_test(lambda u: u.is_superuser), name='dispatch')
+@method_decorator(user_passes_test(lambda u: u.is_staff), name='dispatch')
 class ChartDataView(TemplateView):
     template_name = 'admin_tools_stats/chart_data.html'
 
