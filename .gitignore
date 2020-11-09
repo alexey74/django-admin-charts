@@ -49,4 +49,4 @@ dist/
 *.swo
 *.swn
 *.orig
-/__pycache__/
+**/__pycache__/

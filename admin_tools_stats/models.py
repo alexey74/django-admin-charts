@@ -8,16 +8,14 @@
 # The Initial Developer of the Original Code is
 # Arezqui Belaid <info@star2billing.com>
 #
-import logging
-import datetime
 from collections import OrderedDict
 from datetime import timedelta
+import datetime
+import logging
 
 from cache_utils.decorators import cached
-
 from dateutil.relativedelta import relativedelta, MO
 from dateutil.rrule import rrule, YEARLY, MONTHLY, WEEKLY, DAILY, HOURLY
-
 from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import FieldError, ValidationError
@@ -34,8 +32,8 @@ from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
-
 import jsonfield.fields
+
 
 logger = logging.getLogger(__name__)
 
@@ -51,16 +49,16 @@ operation = (
 )
 
 chart_types = (
-    ('discreteBarChart',        'Bar'),
-    ('lineChart',               'Line'),
-    ('multiBarChart',           'Multi Bar'),
-    ('pieChart',                'Pie'),
-    ('stackedAreaChart',        'Stacked Area'),
+    ('discreteBarChart', 'Bar'),
+    ('lineChart', 'Line'),
+    ('multiBarChart', 'Multi Bar'),
+    ('pieChart', 'Pie'),
+    ('stackedAreaChart', 'Stacked Area'),
     ('multiBarHorizontalChart', 'Multi Bar Horizontal'),
-    ('linePlusBarChart',        'Line Plus Bar'),
-    ('scatterChart',            'Scatter'),
-    ('cumulativeLineChart',     'Cumulative Line'),
-    ('lineWithFocusChart',      'Line With Focus'),
+    ('linePlusBarChart', 'Line Plus Bar'),
+    ('scatterChart', 'Scatter'),
+    ('cumulativeLineChart', 'Cumulative Line'),
+    ('lineWithFocusChart', 'Line With Focus'),
 )
 time_scales = (
     ('hours', 'Hours'),
@@ -69,13 +67,7 @@ time_scales = (
     ('months', 'Months'),
     ('years', 'Years'),
 )
-freqs = {
-    'years': YEARLY,
-    'months': MONTHLY,
-    'weeks': WEEKLY,
-    'days': DAILY,
-    'hours': HOURLY
-}
+freqs = {'years': YEARLY, 'months': MONTHLY, 'weeks': WEEKLY, 'days': DAILY, 'hours': HOURLY}
 
 
 def truncate(dt, interval):
@@ -110,23 +102,29 @@ class DashboardStatsCriteria(models.Model):
 
     **Name of DB table**: dash_stats_criteria
     """
+
     criteria_name = models.CharField(
-        max_length=90, db_index=True,
+        max_length=90,
+        db_index=True,
         verbose_name=_('criteria name'),
         help_text=_("it needs to be one word unique. Ex. status, yesno"),
     )
     criteria_fix_mapping = jsonfield.fields.JSONField(
-        null=True, blank=True,
+        null=True,
+        blank=True,
         verbose_name=_("fixed criteria / value"),
         help_text=_("a JSON dictionary of key-value pairs that will be used for the criteria"),
     )
     dynamic_criteria_field_name = models.CharField(
-        max_length=90, blank=True, null=True,
+        max_length=90,
+        blank=True,
+        null=True,
         verbose_name=_("dynamic criteria field name"),
         help_text=_("ex. for call records - disposition"),
     )
     criteria_dynamic_mapping = jsonfield.fields.JSONField(
-        null=True, blank=True,
+        null=True,
+        blank=True,
         verbose_name=_("dynamic criteria / value"),
         help_text=_(
             mark_safe(
@@ -149,7 +147,9 @@ class DashboardStatsCriteria(models.Model):
 
     def criteria_dynamic_mapping_preview(self):
         if self.criteria_dynamic_mapping:
-            return str(self.criteria_dynamic_mapping)[0:100] + ("..." if len(str(self.criteria_dynamic_mapping)) > 100 else "")
+            return str(self.criteria_dynamic_mapping)[0:100] + (
+                "..." if len(str(self.criteria_dynamic_mapping)) > 100 else ""
+            )
         return ""
 
     class Meta:
@@ -179,36 +179,40 @@ class DashboardStats(models.Model):
 
     **Name of DB table**: dashboard_stats
     """
+
     graph_key = models.CharField(
-        unique=True, max_length=90,
+        unique=True,
+        max_length=90,
         verbose_name=_('graph identifier'),
         help_text=_("it needs to be one word unique. ex. auth, mygraph"),
     )
     graph_title = models.CharField(
-        max_length=90, db_index=True,
-        verbose_name=_('graph title'),
-        help_text=_("heading title of graph box"),
+        max_length=90, db_index=True, verbose_name=_('graph title'), help_text=_("heading title of graph box"),
     )
-    model_app_name = models.CharField(
-        max_length=90, verbose_name=_('app name'),
-        help_text=_("ex. auth / dialer_cdr"),
-    )
-    model_name = models.CharField(
-        max_length=90, verbose_name=_('model name'),
-        help_text=_("ex. User"),
-    )
+    model_app_name = models.CharField(max_length=90, verbose_name=_('app name'), help_text=_("ex. auth / dialer_cdr"),)
+    model_name = models.CharField(max_length=90, verbose_name=_('model name'), help_text=_("ex. User"),)
     date_field_name = models.CharField(
-        max_length=90, verbose_name=_("date field name"),
-        help_text=_("ex. date_joined, invitation__invitation_date"),
+        max_length=90, verbose_name=_("date field name"), help_text=_("ex. date_joined, invitation__invitation_date"),
     )
     user_field_name = models.CharField(
-        max_length=90, verbose_name=_("user field name"),
-        null=True, blank=True,
+        max_length=90,
+        verbose_name=_("user field name"),
+        null=True,
+        blank=True,
         help_text=_("ex. owner, invitation__owner"),
     )
+    group_field_name = models.CharField(
+        max_length=90,
+        verbose_name=_("group field name"),
+        null=True,
+        blank=True,
+        help_text=_("ex. owner_group, invitation__owner_group"),
+    )
     operation_field_name = models.CharField(
-        max_length=90, verbose_name=_("Operate field name"),
-        null=True, blank=True,
+        max_length=90,
+        verbose_name=_("Operate field name"),
+        null=True,
+        blank=True,
         help_text=_("The field you want to aggregate, ex. amount, salaries__total_income"),
     )
     distinct = models.BooleanField(
@@ -221,8 +225,11 @@ class DashboardStats(models.Model):
         ),
     )
     type_operation_field_name = models.CharField(
-        max_length=90, verbose_name=_("Choose Type operation"),
-        null=True, blank=True, choices=operation,
+        max_length=90,
+        verbose_name=_("Choose Type operation"),
+        null=True,
+        blank=True,
+        choices=operation,
         help_text=_("choose the type operation what you want to aggregate, ex. Sum"),
     )
     default_chart_type = models.CharField(
@@ -234,11 +241,7 @@ class DashboardStats(models.Model):
         default='discreteBarChart',
     )
     default_time_period = models.PositiveIntegerField(
-        verbose_name=_("Default period"),
-        help_text=_("Number of days"),
-        null=False,
-        blank=False,
-        default=31,
+        verbose_name=_("Default period"), help_text=_("Number of days"), null=False, blank=False, default=31,
     )
     default_time_scale = models.CharField(
         verbose_name=_("Default time scale"),
@@ -325,10 +328,10 @@ class DashboardStats(models.Model):
 
         operation = {
             'AvgCountPerInstance': lambda field_name, distinct, dkwargs: ExpressionWrapper(
-                1.0 *
-                Count(field_name, distinct=distinct, filter=dkwargs) /
-                Count('id', distinct=True, filter=Q(**{field_name + "__isnull": False})),
-                output_field=models.FloatField()
+                1.0
+                * Count(field_name, distinct=distinct, filter=dkwargs)
+                / Count('id', distinct=True, filter=Q(**{field_name + "__isnull": False})),
+                output_field=models.FloatField(),
             ),
             'Count': lambda field_name, distinct, dkwargs: Count(field_name, distinct=distinct, filter=dkwargs),
             'Sum': lambda field_name, distinct, dkwargs: Sum(field_name, distinct=distinct, filter=dkwargs),
@@ -345,8 +348,13 @@ class DashboardStats(models.Model):
         model_name = apps.get_model(self.model_app_name, self.model_name)
         kwargs = {}
         dynamic_kwargs = []
+        # Filter by users
         if request and not request.user.is_superuser and self.user_field_name:
             kwargs[self.user_field_name] = request.user
+        # Filter by user groups
+        if request and not request.user.is_superuser and self.group_field_name:
+            kwargs[self.group_field_name + '__in'] = request.user.groups.all()
+
         for m2m in all_criteria:
             criteria = m2m.criteria
             # fixed mapping value passed info kwargs
@@ -433,7 +441,9 @@ class DashboardStats(models.Model):
                     names.append(name)
                     values.append(key)
             configuration['select_box_dynamic_' + str(m2m.id)] = values
-            serie_map = self.get_time_series(configuration, all_criteria, request, time_since_tz, time_until_tz, interval)
+            serie_map = self.get_time_series(
+                configuration, all_criteria, request, time_since_tz, time_until_tz, interval
+            )
             for tv in serie_map:
                 time = tv[0]
                 if time not in series:
@@ -471,7 +481,10 @@ class DashboardStats(models.Model):
         for i in self.criteriatostatsm2m_set.filter(use_as='chart_filter').order_by('order'):
             dy_map = i.get_dynamic_choices()
             if dy_map:
-                temp += i.criteria.criteria_name + ': <select class="chart-input dynamic_criteria_select_box" name="select_box_dynamic_%i" >' % i.id
+                temp += (
+                    i.criteria.criteria_name
+                    + ': <select class="chart-input dynamic_criteria_select_box" name="select_box_dynamic_%i" >' % i.id
+                )
                 temp += '<option value="">-------</option>'
                 for key, name in dy_map.items():
                     if isinstance(name, (list, tuple)):
@@ -488,24 +501,46 @@ class DashboardStats(models.Model):
             temp += '<option class="chart-input" value="">-------</option>'
             for serie in multiple_series.order_by('order').all():
                 selected_str = 'selected=selected' if serie == serie.stats.default_multiseries_criteria else ''
-                temp += '<option class="chart-input" value="%s" %s>%s</option>' % (serie.id, selected_str, serie.criteria.criteria_name)
+                temp += '<option class="chart-input" value="%s" %s>%s</option>' % (
+                    serie.id,
+                    selected_str,
+                    serie.criteria.criteria_name,
+                )
             temp += '</select>'
 
         temp += 'Scale: <select class="chart-input select_box_interval" name="select_box_interval" >'
         for interval, interval_name in time_scales:
             selected_str = 'selected=selected' if interval == self.default_time_scale else ''
-            temp += '<option class="chart-input" value="' + interval + '" ' + selected_str + '>' + interval_name + '</option>'
+            temp += (
+                '<option class="chart-input" value="'
+                + interval
+                + '" '
+                + selected_str
+                + '>'
+                + interval_name
+                + '</option>'
+            )
         temp += '</select>'
 
-        temp += 'Since: <input class="chart-input select_box_date_since" type="date" name="time_since" value="%s">' % \
-            (now() - timedelta(days=self.default_time_period)).strftime('%Y-%m-%d')
-        temp += 'Until: <input class="chart-input select_box_date_since" type="date" name="time_until" value="%s">' % \
-            now().strftime('%Y-%m-%d')
+        temp += 'Since: <input class="chart-input select_box_date_since" type="date" name="time_since" value="%s">' % (
+            now() - timedelta(days=self.default_time_period)
+        ).strftime('%Y-%m-%d')
+        temp += 'Until: <input class="chart-input select_box_date_since" type="date" name="time_until" value="%s">' % now().strftime(
+            '%Y-%m-%d'
+        )
 
         temp += 'Chart: <select class="chart-input select_box_chart_type" name="select_box_chart_type" >'
         for chart_type_str, chart_type_name in chart_types:
             selected_str = 'selected=selected' if chart_type_str == self.default_chart_type else ''
-            temp += '<option class="chart-input" value="' + chart_type_str + '" ' + selected_str + '>' + chart_type_name + '</option>'
+            temp += (
+                '<option class="chart-input" value="'
+                + chart_type_str
+                + '" '
+                + selected_str
+                + '>'
+                + chart_type_name
+                + '</option>'
+            )
         temp += '</select>'
         temp += f"&nbsp;<a href='{reverse('chart-analytics')}?show={self.graph_key}' target='_blank'>analytics</a>"
 
@@ -524,19 +559,9 @@ class CriteriaToStatsM2M(models.Model):
     class Meta:
         ordering = ('order',)
 
-    criteria = models.ForeignKey(
-        DashboardStatsCriteria,
-        on_delete=models.CASCADE,
-    )
-    stats = models.ForeignKey(
-        DashboardStats,
-        on_delete=models.CASCADE,
-    )
-    order = models.PositiveIntegerField(
-        unique=True,
-        null=True,
-        blank=True,
-    )
+    criteria = models.ForeignKey(DashboardStatsCriteria, on_delete=models.CASCADE,)
+    stats = models.ForeignKey(DashboardStats, on_delete=models.CASCADE,)
+    order = models.PositiveIntegerField(unique=True, null=True, blank=True,)
     prefix = models.CharField(
         max_length=255,
         verbose_name=_('criteria field prefix'),
@@ -549,10 +574,7 @@ class CriteriaToStatsM2M(models.Model):
         blank=False,
         null=False,
         verbose_name=_("Use dynamic criteria as"),
-        choices=(
-            ('chart_filter', 'Chart filter'),
-            ('multiple_series', 'Multiple series'),
-        ),
+        choices=(('chart_filter', 'Chart filter'), ('multiple_series', 'Multiple series'),),
         default='chart_filter',
     )
     default_option = models.CharField(
@@ -567,11 +589,7 @@ class CriteriaToStatsM2M(models.Model):
         help_text=_('Choices are not cached if this is set to true'),
         default=False,
     )
-    count_limit = models.PositiveIntegerField(
-        null=True,
-        blank=True,
-        default=None,
-    )
+    count_limit = models.PositiveIntegerField(null=True, blank=True, default=None,)
 
     def get_dynamic_criteria_field_name(self):
         if self.prefix:
@@ -592,18 +610,10 @@ class CriteriaToStatsM2M(models.Model):
             return dict(self.criteria.criteria_dynamic_mapping)
         if field_name:
             if field_name.endswith('__isnull'):
-                return OrderedDict((
-                    ('', ('', 'All')),
-                    ('True', (True, 'Blank')),
-                    ('False', (False, 'Non blank')),
-                ))
+                return OrderedDict((('', ('', 'All')), ('True', (True, 'Blank')), ('False', (False, 'Non blank')),))
             field = self.get_dynamic_field(model)
             if field.__class__ == models.BooleanField:
-                return OrderedDict((
-                    ('', ('', 'All')),
-                    ('True', (True, 'True')),
-                    ('False', (False, 'False')),
-                ))
+                return OrderedDict((('', ('', 'All')), ('True', (True, 'True')), ('False', (False, 'False')),))
             else:
                 choices = OrderedDict()
                 fchoices = dict(field.choices or [])
@@ -618,32 +628,18 @@ class CriteriaToStatsM2M(models.Model):
                         time_until = current_tz.localize(time_until).replace(hour=23, minute=59)
                     end_time = time_until
                     date_filters['%s__lte' % self.stats.date_field_name] = end_time
-                choices_queryset = model.objects.filter(
-                        **date_filters,
-                    ).values_list(
-                        field_name,
-                        flat=True,
-                    ).distinct()
+                choices_queryset = model.objects.filter(**date_filters,).values_list(field_name, flat=True,).distinct()
                 if count_limit:
-                    choices_queryset = choices_queryset.annotate(
-                        f_count=self.stats.get_operation(),
-                    ).order_by(
+                    choices_queryset = choices_queryset.annotate(f_count=self.stats.get_operation(),).order_by(
                         '-f_count',
                     )
                     other_choices_queryset = choices_queryset[count_limit:]
                     choices_queryset = choices_queryset[:count_limit]
                 else:
                     choices_queryset = choices_queryset.order_by(field_name)
-                choices.update(
-                    (
-                        (i, (i, fchoices[i] if i in fchoices else i))
-                        for i in choices_queryset
-                    ),
-                )
+                choices.update(((i, (i, fchoices[i] if i in fchoices else i)) for i in choices_queryset),)
                 if count_limit:
-                    choices.update(
-                        [('other', ([i for i in other_choices_queryset], 'other'))]
-                    )
+                    choices.update([('other', ([i for i in other_choices_queryset], 'other'))])
                     choices.move_to_end('other', last=False)
                 return choices
 
