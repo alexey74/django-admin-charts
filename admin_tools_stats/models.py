@@ -351,7 +351,7 @@ class DashboardStats(models.Model):
         restricted_viewer = (
             request
             and not request.user.is_superuser
-            and not user.has_perm('%s.view_%s' % (self.model_app_name, self.model_name))
+            and not request.user.has_perm('%s.view_%s' % (self.model_app_name, self.model_name))
         )
         # Filter by users
         if restricted_viewer and self.user_field_name:
