@@ -348,11 +348,16 @@ class DashboardStats(models.Model):
         model_name = apps.get_model(self.model_app_name, self.model_name)
         kwargs = {}
         dynamic_kwargs = []
+        restricted_viewer = (
+            request
+            and not request.user.is_superuser
+            and not user.has_perm('%s.view_%s' % (self.model_app_name, self.model_name))
+        )
         # Filter by users
-        if request and not request.user.is_superuser and self.user_field_name:
+        if restricted_viewer and self.user_field_name:
             kwargs[self.user_field_name] = request.user
         # Filter by user groups
-        if request and not request.user.is_superuser and self.group_field_name:
+        if restricted_viewer and self.group_field_name:
             kwargs[self.group_field_name + '__in'] = request.user.groups.all()
 
         for m2m in all_criteria:
