@@ -7,7 +7,7 @@
    <script src="{% static "admin/js/vendor/jquery/jquery.js" %}"></script>
    {% include '../include_nvd3.html' %}
    <script src="{% url 'admin-charts' %}" type="text/javascript"></script>
-   <style>
+   <style{% if request and request.csp_nonce %} nonce={{ request.csp_nonce }}{% endif %}>
    .admin_charts {
        padding: 20px 40px;
    }
