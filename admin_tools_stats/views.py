@@ -44,6 +44,7 @@ def get_dateformat(interval, chart_type):
 @method_decorator(user_passes_test(lambda u: u.is_staff), name='dispatch')
 class ChartDataView(TemplateView):
     template_name = 'admin_tools_stats/chart_data.html'
+    content_type = 'application/javascript; charset=utf-8'
 
     def get_context_data(self, *args, interval=None, graph_key=None, **kwargs):
         context = super().get_context_data(*args, **kwargs)
