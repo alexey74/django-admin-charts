@@ -1,6 +1,6 @@
 
-var html_string = '<svg style="width:100%;height:400px"></svg>';
-var html_string_analytics = '<svg style="width:100%;height:100%"></svg>';
+var html_string = '<svg class="nvd3-svg"></svg>';
+var html_string_analytics = '<svg class="nvd3-svg-analytics"></svg>';
 var chart_scripts = {};
 
 function loadChart(data, graph_key){
